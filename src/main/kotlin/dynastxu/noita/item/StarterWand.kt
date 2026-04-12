@@ -7,13 +7,10 @@ import net.minecraft.util.RandomSource
 import net.minecraft.world.item.ItemStack
 
 class StarterWand(properties: Properties) : Wand(properties) {
-    override fun getDefaultInstance(): ItemStack {
-        val stack = ItemStack(this)
+    override fun initializeWandData(stack: ItemStack) {
+        if (stack.get(WAND_DATA.get()) != null) return
 
-        // 使用 Minecraft 的随机源 (同步种子，适合客户端显示)
         val random = RandomSource.create()
-
-        // 设置自定义数据组件
         stack.set(WAND_DATA.get(), WandData(
             false,
             1,
@@ -26,7 +23,5 @@ class StarterWand(properties: Properties) : Wand(properties) {
             listOf(),
             1f
         ))
-
-        return stack
     }
 }

@@ -27,7 +27,7 @@ open class Wand(properties: Properties) : Item(properties) {
         return stack
     }
 
-    private fun initializeWandData(stack: ItemStack) {
+    protected open fun initializeWandData(stack: ItemStack) {
         if (stack.get(WAND_DATA.get()) != null) return
 
         val random = RandomSource.create()
