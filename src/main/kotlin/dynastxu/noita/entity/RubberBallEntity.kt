@@ -73,7 +73,7 @@ class RubberBallEntity : NoitaThrowableProjectile {
                 val offsetZ = nextRandomDouble(-0.1, 0.1, level())
 
                 val velocityX = nextRandomDouble(-0.05, 0.05, level())
-                val velocityY = nextRandomDouble(-0.2, -0.05, level())
+                val velocityY = nextRandomDouble(-0.05, -0.05, level())
                 val velocityZ = nextRandomDouble(-0.05, 0.05, level())
 
                 level().addParticle(

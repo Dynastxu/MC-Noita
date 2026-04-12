@@ -2,6 +2,7 @@ package dynastxu.noita
 
 import dynastxu.noita.client.renderer.RubberBallRenderer
 import dynastxu.noita.component.ModDataComponents
+import dynastxu.noita.damage.ModDamageTypes
 import dynastxu.noita.entity.ModEntities
 import dynastxu.noita.item.ModItems
 import net.minecraft.client.Minecraft
@@ -35,13 +36,12 @@ object Noita {
     init {
         LOGGER.log(Level.INFO, "Hello world!")
 
-
-
         MOD_BUS.addListener { event: RegisterRenderers? -> this.registerRenderers(event!!) }
 
         ModItems.ITEMS.register(MOD_BUS)
         ModDataComponents.DATA_COMPONENTS.register(MOD_BUS)
         ModEntities.ENTITY_TYPES.register(MOD_BUS)
+        ModDamageTypes.register()
 
         val obj = runForDist(clientTarget = {
             MOD_BUS.addListener(::onClientSetup)
