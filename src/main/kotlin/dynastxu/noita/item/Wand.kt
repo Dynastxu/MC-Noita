@@ -66,20 +66,19 @@ open class Wand(properties: Properties) : Item(properties) {
         } else {
             // 服务端逻辑：这里放置每 tick 执行的内容
 
-            // 创建实体实例
-
             val eyePos = user.getEyePosition(1.0f)
+            val lookVec = user.lookAngle
+            val spawnPos = eyePos.add(lookVec.x, lookVec.y, lookVec.z)
             val ball = RubberBallEntity(
                 RUBBER_BALL.get(),
-                eyePos.x,
-                eyePos.y,
-                eyePos.z,
+                spawnPos.x,
+                spawnPos.y,
+                spawnPos.z,
                 level,
                 Spells.rubberBall
             )
 
             // 设置发射方向和速度
-            val lookVec = user.lookAngle
             ball.shoot(
                 lookVec.x,
                 lookVec.y,
