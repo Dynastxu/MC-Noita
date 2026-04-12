@@ -38,29 +38,21 @@ class RubberBallEntity : NoitaThrowableProjectile {
         if (!level().isClientSide && level() is ServerLevel) {
             val serverLevel = level() as ServerLevel
 
-            val particleCount = 20
+            val packet = ClientboundLevelParticlesPacket(
+                ParticleTypes.CRIT,
+                true,
+                result.location.x,
+                result.location.y,
+                result.location.z,
+                0.3f,
+                0.3f,
+                0.3f,
+                0.1f,
+                20
+            )
 
-            for (i in 0 until particleCount) {
-                val speedX = random.nextGaussian() * 0.3f
-                val speedY = abs(random.nextGaussian()).toFloat() * 0.3f + 0.1f
-                val speedZ = random.nextGaussian() * 0.3f
-
-                val packet = ClientboundLevelParticlesPacket(
-                    ParticleTypes.CRIT,
-                    true,
-                    result.location.x,
-                    result.location.y,
-                    result.location.z,
-                    speedX.toFloat(),
-                    speedY,
-                    speedZ.toFloat(),
-                    0.0f,
-                    1
-                )
-
-                serverLevel.players().forEach { player ->
-                    player.connection.send(packet)
-                }
+            serverLevel.players().forEach { player ->
+                player.connection.send(packet)
             }
         }
     }
