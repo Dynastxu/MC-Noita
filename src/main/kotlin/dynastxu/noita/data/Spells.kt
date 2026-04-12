@@ -1,9 +1,11 @@
 package dynastxu.noita.data
 
-import dynastxu.noita.utils.UnitConversion.*
+import dynastxu.noita.utils.UnitConversion.NoitaFrame
+import dynastxu.noita.utils.UnitConversion.NoitaGravity
+import dynastxu.noita.utils.UnitConversion.NoitaPx
+import dynastxu.noita.utils.UnitConversion.NoitaFriction
 
 object Spells {
-    @JvmField
     val rubberBall = Spell(
         type = Spell.Type.Projectile,
         manaDrain = 5,
