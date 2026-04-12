@@ -117,11 +117,13 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
 
     override fun onHitEntity(result: EntityHitResult) {
         val entity: Entity = result.entity
-        val damage = onCalculationDamage()
+        val damage = onCalculationDamage() / 5
         if (!(entity == this.owner && !selfHarm)) {
             val damageSource = this.damageSources().source(DamageTypes.ARROW, this, this.owner)
             entity.hurt(damageSource, damage)
+            entity.invulnerableTime = 0
         }
+        onDiscard()
     }
 
     protected open fun onCalculationDamage() : Float {
@@ -137,7 +139,6 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
         // 生命周期检查: 超过最大存活时间则移除
         if (lifetime.value != 0 && this.tickCount > lifetime.toTick()) {
             onDiscard()
-            this.discard()
             return
         }
 
@@ -145,7 +146,6 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
         val speedPerTick: Double = diesIfSpeedFallsBelow.toMcDistance() / 20 * UnitConversion.BASE_TIME // 换算成米每秒
         if (diesIfSpeedFallsBelow.value != 0 && this.deltaMovement.lengthSqr() < speedPerTick * speedPerTick) {
             onDiscard()
-            this.discard()
             return
         }
 
@@ -161,6 +161,7 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
     }
 
     protected fun onDiscard() {
+        this.discard()
     }
 
     public override fun readAdditionalSaveData(tag: CompoundTag) {
