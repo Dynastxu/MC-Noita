@@ -39,6 +39,7 @@ object Noita {
         MOD_BUS.addListener { event: RegisterRenderers? -> this.registerRenderers(event!!) }
 
         ModItems.ITEMS.register(MOD_BUS)
+        ModItems.CREATIVE_MODE_TABS.register(MOD_BUS)
         ModDataComponents.DATA_COMPONENTS.register(MOD_BUS)
         ModEntities.ENTITY_TYPES.register(MOD_BUS)
         ModDamageTypes.register()
