@@ -17,14 +17,30 @@ class ModLanguageProvider(output: PackOutput, modid: String, private val locale:
     }
 
     private fun addEnglishTranslations() {
-        addItem(ModItems.WAND, "Wand")
-        addItem(ModItems.STARTER_WAND, "Starter Wand")
+        fun addItemTranslations() {
+            // 法杖
+            addItem(ModItems.WAND, "Wand")
+            addItem(ModItems.STARTER_WAND, "Starter Wand")
+
+            // 法术
+            addItem(ModItems.RUBBER_BALL, "Bouncing Burst")
+        }
+
         add("itemGroup.noita", "Noita")
+        addItemTranslations()
     }
 
     private fun addChineseTranslations() {
-        addItem(ModItems.WAND, "法杖")
-        addItem(ModItems.STARTER_WAND, "初始法杖")
+        fun addItemTranslations() {
+            // 法杖
+            addItem(ModItems.WAND, "法杖")
+            addItem(ModItems.STARTER_WAND, "初始法杖")
+
+            // 法术
+            addItem(ModItems.RUBBER_BALL, "弹跳绿豆")
+        }
+
         add("itemGroup.noita", "女巫")
+        addItemTranslations()
     }
 }
