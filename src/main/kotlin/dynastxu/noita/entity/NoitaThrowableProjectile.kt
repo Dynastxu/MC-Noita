@@ -112,14 +112,14 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
         )
     }
 
-    override open fun onHitEntity(result: EntityHitResult) {
+    open override fun onHitEntity(result: EntityHitResult) {
         super.onHitEntity(result)
     }
 
     protected open fun onBounced(result: HitResult) {
     }
 
-    override open fun tick() {
+    open override fun tick() {
         super.tick()
 
         // 生命周期检查: 超过最大存活时间则移除

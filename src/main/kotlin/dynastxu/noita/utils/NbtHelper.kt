@@ -100,7 +100,7 @@ object NbtHelper {
         }
 
         val spells: MutableList<Spell> = ArrayList()
-        for (i in 0..<size) {
+        repeat(size) {
             val name = ByteBufCodecs.STRING_UTF8.decode(buf)
             val spell: Spell? = getSpellByName(name)
             if (spell != null) {
