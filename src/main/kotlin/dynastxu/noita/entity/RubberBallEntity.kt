@@ -61,6 +61,10 @@ class RubberBallEntity : NoitaThrowableProjectile {
         super.onHitEntity(result)
     }
 
+    override fun onCalculationDamage(): Float {
+        return ((this.deltaMovement.length() / initialSpeed.toMcDistance()) * projectile).toFloat() + super.onCalculationDamage()
+    }
+
     override fun tick() {
         super.tick()
 

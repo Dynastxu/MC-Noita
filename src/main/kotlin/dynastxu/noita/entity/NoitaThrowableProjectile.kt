@@ -1,6 +1,7 @@
 package dynastxu.noita.entity
 
 import com.mojang.logging.LogUtils
+import dynastxu.noita.damage.ModDamageTypes
 import dynastxu.noita.data.Spell
 import dynastxu.noita.utils.NbtHelper
 import dynastxu.noita.utils.UnitConversion
@@ -9,6 +10,8 @@ import dynastxu.noita.utils.UnitConversion.NoitaFriction
 import dynastxu.noita.utils.UnitConversion.NoitaGravity
 import dynastxu.noita.utils.UnitConversion.NoitaPx
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.damagesource.DamageTypes
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableProjectile
 import net.minecraft.world.level.Level
@@ -113,7 +116,16 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
     }
 
     override fun onHitEntity(result: EntityHitResult) {
-        super.onHitEntity(result)
+        val entity: Entity = result.entity
+        val damage = onCalculationDamage()
+        if (!(entity == this.owner && !selfHarm)) {
+            val damageSource = this.damageSources().source(DamageTypes.ARROW, this, this.owner)
+            entity.hurt(damageSource, damage)
+        }
+    }
+
+    protected open fun onCalculationDamage() : Float {
+        return 0f
     }
 
     protected open fun onBounced(result: HitResult) {
