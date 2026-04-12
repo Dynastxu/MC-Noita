@@ -2,13 +2,12 @@ package dynastxu.noita.entity
 
 import com.mojang.logging.LogUtils
 import dynastxu.noita.data.Spell
-import dynastxu.noita.utils.MathHelper.getRandomIntInRange
 import dynastxu.noita.utils.NbtHelper
 import dynastxu.noita.utils.UnitConversion
-import dynastxu.noita.utils.UnitConversion.NoitaPx
 import dynastxu.noita.utils.UnitConversion.NoitaFrame
-import dynastxu.noita.utils.UnitConversion.NoitaGravity
 import dynastxu.noita.utils.UnitConversion.NoitaFriction
+import dynastxu.noita.utils.UnitConversion.NoitaGravity
+import dynastxu.noita.utils.UnitConversion.NoitaPx
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableProjectile
@@ -45,13 +44,13 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
         projectile = spell.projectile
         explosionRadius = spell.explosionRadius
         lifetime = NoitaFrame(
-            getRandomIntInRange(
+            level().random.nextIntBetweenInclusive(
                 spell.lifetime.first.value,
                 spell.lifetime.second.value
             )
         )
         initialSpeed = NoitaPx(
-            getRandomIntInRange(
+            level.random.nextIntBetweenInclusive(
                 spell.initialSpeed.first.value,
                 spell.initialSpeed.second.value
             )
@@ -113,14 +112,14 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
         )
     }
 
-    override fun onHitEntity(result: EntityHitResult) {
+    override open fun onHitEntity(result: EntityHitResult) {
         super.onHitEntity(result)
     }
 
     protected open fun onBounced(result: HitResult) {
     }
 
-    override fun tick() {
+    override open fun tick() {
         super.tick()
 
         // 生命周期检查: 超过最大存活时间则移除

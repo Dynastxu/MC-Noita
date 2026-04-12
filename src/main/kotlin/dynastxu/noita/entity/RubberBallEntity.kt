@@ -1,6 +1,7 @@
 package dynastxu.noita.entity
 
 import dynastxu.noita.data.Spell
+import dynastxu.noita.utils.MathHelper.nextRandomDouble
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.network.syncher.SynchedEntityData
@@ -8,9 +9,8 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableProjectile
 import net.minecraft.world.level.Level
-import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.EntityHitResult
 import net.minecraft.world.phys.HitResult
-import kotlin.math.abs
 
 /**
  * [Wiki](https://noita.wiki.gg/wiki/Bouncing_Burst)
@@ -53,6 +53,39 @@ class RubberBallEntity : NoitaThrowableProjectile {
 
             serverLevel.players().forEach { player ->
                 player.connection.send(packet)
+            }
+        }
+    }
+
+    override fun onHitEntity(result: EntityHitResult) {
+        super.onHitEntity(result)
+    }
+
+    override fun tick() {
+        super.tick()
+
+        if (level().isClientSide) {
+            val particleCount = 6
+
+            repeat(particleCount) {
+                val offsetX = nextRandomDouble(-0.1, 0.1, level())
+                val offsetY = nextRandomDouble(-0.1, 0.1, level())
+                val offsetZ = nextRandomDouble(-0.1, 0.1, level())
+
+                val velocityX = nextRandomDouble(-0.05, 0.05, level())
+                val velocityY = nextRandomDouble(-0.2, -0.05, level())
+                val velocityZ = nextRandomDouble(-0.05, 0.05, level())
+
+                level().addParticle(
+                    ParticleTypes.HAPPY_VILLAGER,
+                    true,
+                    x + offsetX,
+                    y + offsetY,
+                    z + offsetZ,
+                    velocityX,
+                    velocityY,
+                    velocityZ
+                )
             }
         }
     }

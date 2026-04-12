@@ -6,7 +6,7 @@ import dynastxu.noita.component.WandData
 import dynastxu.noita.data.Spells
 import dynastxu.noita.entity.ModEntities.RUBBER_BALL
 import dynastxu.noita.entity.RubberBallEntity
-import dynastxu.noita.utils.MathHelper.getRandomDoubleInRange
+import dynastxu.noita.utils.MathHelper.nextRandomDouble
 import net.minecraft.network.chat.Component
 import net.minecraft.util.RandomSource
 import net.minecraft.world.InteractionHand
@@ -84,9 +84,10 @@ open class Wand(properties: Properties) : Item(properties) {
                 lookVec.x,
                 lookVec.y,
                 lookVec.z,
-                getRandomDoubleInRange(
+                nextRandomDouble(
                     Spells.rubberBall.initialSpeed.first.toMcDistance(),
-                    Spells.rubberBall.initialSpeed.second.toMcDistance()
+                    Spells.rubberBall.initialSpeed.second.toMcDistance(),
+                    level
                 ).toFloat(),
                 0.0f
             )
