@@ -7,6 +7,7 @@ import dynastxu.noita.data.Spells
 import dynastxu.noita.entity.ModEntities.RUBBER_BALL
 import dynastxu.noita.entity.RubberBallEntity
 import dynastxu.noita.utils.MathHelper.getRandomDoubleInRange
+import net.minecraft.network.chat.Component
 import net.minecraft.util.RandomSource
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResultHolder
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.TooltipFlag
 import net.minecraft.world.level.Level
 import org.slf4j.Logger
 
@@ -21,12 +23,15 @@ open class Wand(properties: Properties) : Item(properties) {
     // 当物品堆叠被创建时，填入随机数据
     override fun getDefaultInstance(): ItemStack {
         val stack = ItemStack(this)
+        initializeWandData(stack)
+        return stack
+    }
 
-        // 使用 Minecraft 的随机源 (同步种子，适合客户端显示)
+    private fun initializeWandData(stack: ItemStack) {
+        if (stack.get(WAND_DATA.get()) != null) return
+
         val random = RandomSource.create()
-
-        // 设置自定义数据组件
-        stack.set<WandData?>(
+        stack.set(
             WAND_DATA.get(), WandData(
                 random.nextBoolean(),
                 random.nextIntBetweenInclusive(1, 3),
@@ -40,8 +45,6 @@ open class Wand(properties: Properties) : Item(properties) {
                 1f
             )
         )
-
-        return stack
     }
 
     // 定义最大使用时长 (单位：tick，72000 代表近乎无限长按)
@@ -98,5 +101,27 @@ open class Wand(properties: Properties) : Item(properties) {
 
     companion object {
         private val LOGGER: Logger = LogUtils.getLogger()
+    }
+
+    override fun appendHoverText(
+        stack: ItemStack,
+        context: TooltipContext,
+        tooltipComponents: MutableList<Component>,
+        tooltipFlag: TooltipFlag
+    ) {
+        initializeWandData(stack)
+
+        val wandData = stack.get(WAND_DATA.get()) ?: return
+
+        tooltipComponents.add(Component.literal("§7§o§l--- 法杖属性 ---"))
+        tooltipComponents.add(Component.literal("§b法力值: §f${wandData.manaMax}"))
+        tooltipComponents.add(Component.literal("§b法力回复: §f${wandData.manaChgSpd}/s"))
+        tooltipComponents.add(Component.literal("§b施法延迟: §f${String.format("%.2f", wandData.castDelay / 20)}s"))
+        tooltipComponents.add(Component.literal("§b充能时间: §f${String.format("%.2f", wandData.rechargeTime / 20)}s"))
+        tooltipComponents.add(Component.literal("§b每次施法: §f${wandData.spellsPerCast} 个法术"))
+        tooltipComponents.add(Component.literal("§b容量: §f${wandData.capacity}"))
+        tooltipComponents.add(Component.literal("§b散射角度: §f${String.format("%.1f", wandData.spread)}°"))
+        tooltipComponents.add(Component.literal("§b速度加成: §f${String.format("%.1f", wandData.speedMultiplier * 100)}%"))
+        tooltipComponents.add(Component.literal("§b乱序施法: §f${if (wandData.shuffle) "是" else "否"}"))
     }
 }
