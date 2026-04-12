@@ -14,6 +14,8 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.projectile.ThrowableProjectile
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.EntityHitResult
+import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 import org.slf4j.Logger
 import kotlin.math.atan2
@@ -92,7 +94,7 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
             // 更新朝向，使其“面朝”运动方向
             this.yRot = Math.toDegrees(atan2(reflected.z, reflected.x)).toFloat()
             bounces--
-            onBounced()
+            onBounced(result)
         } else {
             if (normal.y != 0.0) {
                 this.deltaMovement = Vec3(motion.x, 0.0, motion.z)
@@ -111,7 +113,11 @@ abstract class NoitaThrowableProjectile : ThrowableProjectile {
         )
     }
 
-    protected fun onBounced() {
+    override fun onHitEntity(result: EntityHitResult) {
+        super.onHitEntity(result)
+    }
+
+    protected open fun onBounced(result: HitResult) {
     }
 
     override fun tick() {
