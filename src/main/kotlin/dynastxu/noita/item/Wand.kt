@@ -1,6 +1,7 @@
 package dynastxu.noita.item
 
 import com.mojang.logging.LogUtils
+import dynastxu.noita.Noita
 import dynastxu.noita.component.ModDataComponents.WAND_DATA
 import dynastxu.noita.component.WandData
 import dynastxu.noita.data.Spells
@@ -112,26 +113,38 @@ open class Wand(properties: Properties) : Item(properties) {
         val wandData = stack.get(WAND_DATA.get())
 
         if (wandData == null) {
-            tooltipComponents.add(Component.literal("§c§o§l未初始化"))
+            tooltipComponents.add(Component.translatable("tooltip.${Noita.ID}.wand.not_initialized"))
         } else {
-            tooltipComponents.add(Component.literal("§7§o§l--- 法杖属性 ---"))
-            tooltipComponents.add(Component.literal("§b乱序: §f${if (wandData.shuffle) "是" else "否"}"))
-            tooltipComponents.add(Component.literal("§b法术释放: §f${wandData.spellsPerCast}"))
-            tooltipComponents.add(Component.literal("§b施放延迟: §f${String.format("%.2f", wandData.castDelay)}s"))
             tooltipComponents.add(
-                Component.literal(
-                    "§b充能延迟: §f${
-                        String.format(
-                            "%.2f",
-                            wandData.rechargeTime
-                        )
-                    }s"
+                Component.translatable(
+                    "tooltip.${Noita.ID}.wand.shuffle",
+                    if (wandData.shuffle) Component.translatable("tooltip.${Noita.ID}.yes") else Component.translatable(
+                        "tooltip.noita.no"
+                    )
                 )
             )
-            tooltipComponents.add(Component.literal("§b法力最大值: §f${wandData.manaMax}"))
-            tooltipComponents.add(Component.literal("§b法力充能速度: §f${wandData.manaChgSpd}/s"))
-            tooltipComponents.add(Component.literal("§b容量: §f${wandData.capacity}"))
-            tooltipComponents.add(Component.literal("§b散射: §f${String.format("%.1f", wandData.spread)}°"))
+            tooltipComponents.add(
+                Component.translatable(
+                    "tooltip.${Noita.ID}.wand.spells_per_cast",
+                    wandData.spellsPerCast
+                )
+            )
+            tooltipComponents.add(
+                Component.translatable(
+                    "tooltip.${Noita.ID}.wand.cast_delay",
+                    "%.2f".format(wandData.castDelay)
+                )
+            )
+            tooltipComponents.add(
+                Component.translatable(
+                    "tooltip.${Noita.ID}.wand.recharge_time",
+                    "%.2f".format(wandData.rechargeTime)
+                )
+            )
+            tooltipComponents.add(Component.translatable("tooltip.${Noita.ID}.wand.mana_max", wandData.manaMax))
+            tooltipComponents.add(Component.translatable("tooltip.${Noita.ID}.wand.mana_chg_spd", wandData.manaChgSpd))
+            tooltipComponents.add(Component.translatable("tooltip.${Noita.ID}.wand.capacity", wandData.capacity))
+            tooltipComponents.add(Component.translatable("tooltip.${Noita.ID}.wand.spread", wandData.spread))
         }
     }
 }
