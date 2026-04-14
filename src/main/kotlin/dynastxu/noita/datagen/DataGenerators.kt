@@ -26,5 +26,11 @@ object DataGenerators {
             event.includeClient(),
             ModLanguageProvider(packOutput, Noita.ID, "zh_cn")
         )
+        val blockTagsProvider = ModBlockTagsProvider(packOutput, lookupProvider, existingFileHelper)
+        generator.addProvider(event.includeServer(), blockTagsProvider)
+        generator.addProvider(
+            event.includeServer(),
+            ModItemTagsProvider(packOutput, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper)
+        )
     }
 }
