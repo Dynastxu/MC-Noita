@@ -1,11 +1,15 @@
 package dynastxu.noita
 
+import dynastxu.noita.block.ModBlocks
 import dynastxu.noita.client.renderer.RubberBallRenderer
 import dynastxu.noita.component.ModDataComponents
 import dynastxu.noita.damage.ModDamageTypes
 import dynastxu.noita.entity.ModEntities
 import dynastxu.noita.item.ModItems
+import dynastxu.noita.menu.ModMenus
+import dynastxu.noita.screen.WandWorkbenchScreen
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.screens.MenuScreens
 import net.minecraft.client.renderer.entity.EntityRendererProvider
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
@@ -14,6 +18,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
 import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -36,13 +41,16 @@ object Noita {
     init {
         LOGGER.log(Level.INFO, "Hello world!")
 
-        MOD_BUS.addListener { event: RegisterRenderers? -> this.registerRenderers(event!!) }
+        MOD_BUS.addListener(::registerRenderers)
+        MOD_BUS.addListener(::registerMenuScreens)
 
         ModItems.ITEMS.register(MOD_BUS)
         ModItems.CREATIVE_MODE_TABS.register(MOD_BUS)
         ModDataComponents.DATA_COMPONENTS.register(MOD_BUS)
         ModEntities.ENTITY_TYPES.register(MOD_BUS)
         ModDamageTypes.register()
+        ModBlocks.BLOCKS.register(MOD_BUS)
+        ModMenus.MENUS.register(MOD_BUS)
 
         val obj = runForDist(clientTarget = {
             MOD_BUS.addListener(::onClientSetup)
@@ -80,5 +88,11 @@ object Noita {
         event.registerEntityRenderer(
             ModEntities.RUBBER_BALL.get()
         ) { context: EntityRendererProvider.Context -> RubberBallRenderer(context) }
+    }
+
+    private fun registerMenuScreens(event: RegisterMenuScreensEvent) {
+        event.register(ModMenus.WAND_WORKBENCH_MENU.get()) { menu, inventory, title ->
+            WandWorkbenchScreen(menu, inventory, title)
+        }
     }
 }

@@ -4,9 +4,10 @@ import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import dynastxu.noita.data.Spell
 import dynastxu.noita.utils.NbtHelper
-import io.netty.buffer.ByteBuf
+import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
+import net.minecraft.world.item.ItemStack
 
 /**
  * 魔杖数据组件
@@ -20,6 +21,7 @@ import net.minecraft.network.codec.StreamCodec
  * @param spread 散射
  * @param alwaysCasts 始终释放
  * @param speedMultiplier 速度加成
+ * @param inventorySlots 物品栏槽位
  */
 data class WandData(
     val shuffle: Boolean,
@@ -31,10 +33,10 @@ data class WandData(
     val capacity: Int,
     val spread: Float,
     val alwaysCasts: List<Spell>,
-    val speedMultiplier: Float
+    val speedMultiplier: Float,
+    val inventorySlots: List<ItemStack> = listOf()
 ) {
     companion object {
-        @JvmStatic
         val CODEC: Codec<WandData> = RecordCodecBuilder.create { instance ->
             instance.group(
                 Codec.BOOL.optionalFieldOf("shuffle", false).forGetter(WandData::shuffle),
@@ -47,12 +49,13 @@ data class WandData(
                 Codec.FLOAT.optionalFieldOf("spread", 0.0f).forGetter(WandData::spread),
                 NbtHelper.createSpellListCodec("always_casts").optionalFieldOf("always_casts", listOf())
                     .forGetter(WandData::alwaysCasts),
-                Codec.FLOAT.optionalFieldOf("speed_multiplier", 1.0f).forGetter(WandData::speedMultiplier)
+                Codec.FLOAT.optionalFieldOf("speed_multiplier", 1.0f).forGetter(WandData::speedMultiplier),
+                ItemStack.CODEC.listOf().optionalFieldOf("inventory_slots", listOf()).forGetter(WandData::inventorySlots)
             ).apply(instance, ::WandData)
         }
 
-        val STREAM_CODEC: StreamCodec<ByteBuf, WandData> = object : StreamCodec<ByteBuf, WandData> {
-            override fun decode(buf: ByteBuf): WandData {
+        val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, WandData> = object : StreamCodec<RegistryFriendlyByteBuf, WandData> {
+            override fun decode(buf: RegistryFriendlyByteBuf): WandData {
                 val shuffle = ByteBufCodecs.BOOL.decode(buf)
                 val spellsPerCast = ByteBufCodecs.VAR_INT.decode(buf)
                 val castDelay = ByteBufCodecs.FLOAT.decode(buf)
@@ -63,6 +66,7 @@ data class WandData(
                 val spread = ByteBufCodecs.FLOAT.decode(buf)
                 val alwaysCasts = NbtHelper.readSpellList(buf)
                 val speedMultiplier = ByteBufCodecs.FLOAT.decode(buf)
+                val inventorySlots = ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buf)
                 return WandData(
                     shuffle,
                     spellsPerCast,
@@ -73,11 +77,12 @@ data class WandData(
                     capacity,
                     spread,
                     alwaysCasts,
-                    speedMultiplier
+                    speedMultiplier,
+                    inventorySlots
                 )
             }
 
-            override fun encode(buf: ByteBuf, data: WandData) {
+            override fun encode(buf: RegistryFriendlyByteBuf, data: WandData) {
                 ByteBufCodecs.BOOL.encode(buf, data.shuffle)
                 ByteBufCodecs.VAR_INT.encode(buf, data.spellsPerCast)
                 ByteBufCodecs.FLOAT.encode(buf, data.castDelay)
@@ -88,6 +93,7 @@ data class WandData(
                 ByteBufCodecs.FLOAT.encode(buf, data.spread)
                 NbtHelper.writeSpellList(buf, data.alwaysCasts)
                 ByteBufCodecs.FLOAT.encode(buf, data.speedMultiplier)
+                ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, data.inventorySlots)
             }
         }
     }

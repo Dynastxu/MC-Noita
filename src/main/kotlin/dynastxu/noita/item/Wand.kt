@@ -42,15 +42,20 @@ open class Wand(properties: Properties) : Item(properties) {
                 random.nextIntBetweenInclusive(1, 20),
                 random.nextIntBetweenInclusive(1, 20),
                 0f,
-                mutableListOf(),
+                listOf(),
                 1f
             )
         )
     }
 
-    // 定义最大使用时长 (单位：tick，72000 代表近乎无限长按)
+    fun getCapacity(stack: ItemStack): Int {
+        return if (stack.get(WAND_DATA.get()) == null) 0
+        else stack.get(WAND_DATA.get())!!.capacity
+    }
+
+    // 定义最大使用时长
     override fun getUseDuration(stack: ItemStack, entity: LivingEntity): Int {
-        return 72000
+        return Int.MAX_VALUE
     }
 
     // 右键开始使用时触发
