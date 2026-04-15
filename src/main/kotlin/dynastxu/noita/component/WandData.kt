@@ -34,7 +34,7 @@ data class WandData(
     val spread: Float,
     val alwaysCasts: List<Spell>,
     val speedMultiplier: Float,
-    val inventorySlots: List<ItemStack> = listOf()
+    val inventorySlots: List<ItemStack?> =  List(capacity) { null }
 ) {
     companion object {
         val CODEC: Codec<WandData> = RecordCodecBuilder.create { instance ->
@@ -50,7 +50,7 @@ data class WandData(
                 NbtHelper.createSpellListCodec("always_casts").optionalFieldOf("always_casts", listOf())
                     .forGetter(WandData::alwaysCasts),
                 Codec.FLOAT.optionalFieldOf("speed_multiplier", 1.0f).forGetter(WandData::speedMultiplier),
-                ItemStack.CODEC.listOf().optionalFieldOf("inventory_slots", listOf()).forGetter(WandData::inventorySlots)
+                ItemStack.OPTIONAL_CODEC.listOf().optionalFieldOf("inventory_slots", listOf()).forGetter(WandData::inventorySlots)
             ).apply(instance, ::WandData)
         }
 
@@ -66,7 +66,7 @@ data class WandData(
                 val spread = ByteBufCodecs.FLOAT.decode(buf)
                 val alwaysCasts = NbtHelper.readSpellList(buf)
                 val speedMultiplier = ByteBufCodecs.FLOAT.decode(buf)
-                val inventorySlots = ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buf)
+                val inventorySlots = readItemStackList(buf)
                 return WandData(
                     shuffle,
                     spellsPerCast,
@@ -93,7 +93,37 @@ data class WandData(
                 ByteBufCodecs.FLOAT.encode(buf, data.spread)
                 NbtHelper.writeSpellList(buf, data.alwaysCasts)
                 ByteBufCodecs.FLOAT.encode(buf, data.speedMultiplier)
-                ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, data.inventorySlots)
+                writeItemStackList(buf, data.inventorySlots)
+            }
+
+            private fun writeItemStackList(buf: RegistryFriendlyByteBuf, slots: List<ItemStack?>) {
+                ByteBufCodecs.VAR_INT.encode(buf, slots.size)
+                for (slot in slots) {
+                    if (slot == null || slot.isEmpty) {
+                        ByteBufCodecs.BOOL.encode(buf, false)
+                    } else {
+                        ByteBufCodecs.BOOL.encode(buf, true)
+                        ItemStack.STREAM_CODEC.encode(buf, slot)
+                    }
+                }
+            }
+
+            private fun readItemStackList(buf: RegistryFriendlyByteBuf): List<ItemStack?> {
+                val size = ByteBufCodecs.VAR_INT.decode(buf)
+                if (size <= 0) {
+                    return emptyList()
+                }
+
+                val slots = mutableListOf<ItemStack?>()
+                repeat(size) {
+                    val hasItem = ByteBufCodecs.BOOL.decode(buf)
+                    if (hasItem) {
+                        slots.add(ItemStack.STREAM_CODEC.decode(buf))
+                    } else {
+                        slots.add(null)
+                    }
+                }
+                return slots
             }
         }
     }

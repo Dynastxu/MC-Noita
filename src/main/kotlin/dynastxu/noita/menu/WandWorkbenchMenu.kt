@@ -1,9 +1,10 @@
 package dynastxu.noita.menu
 
+import dynastxu.noita.Noita.ID
 import dynastxu.noita.block.ModBlocks
-import dynastxu.noita.item.ModItems
 import dynastxu.noita.item.Wand
 import dynastxu.noita.tag.ModItemTags
+import net.minecraft.world.Containers
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
@@ -11,12 +12,15 @@ import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.ContainerLevelAccess
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 class WandWorkbenchMenu(
     containerId: Int,
     private val playerInventory: Inventory,
     private val access: ContainerLevelAccess
 ) : AbstractContainerMenu(ModMenus.WAND_WORKBENCH_MENU.get(), containerId) {
+    private val LOGGER: Logger = LogManager.getLogger(ID)
     companion object {
         // 显示常量
         private const val WAND_SLOT_INDEX = 0
@@ -57,8 +61,40 @@ class WandWorkbenchMenu(
             override fun setChanged() {
                 super.setChanged()
                 updateCapacityFromWand()
+                loadSpellsFromWand()
+            }
+
+            override fun onTake(player: Player, stack: ItemStack) {
+                saveSpellsToWand(player, stack)
+                super.onTake(player, stack)
             }
         })
+    }
+
+    private fun saveSpellsToWand(player: Player, wandStack: ItemStack) {
+        if (wandStack.isEmpty) return
+        if (wandStack.item is Wand) {
+            val wand = wandStack.item as Wand
+            val capacity = wand.getCapacity(wandStack)  // 直接从法杖读取容量
+            val inventorySlots = List(capacity) { index ->
+                val itemStack = spellContainer.getItem(index)
+                if (itemStack.isEmpty) null else itemStack
+            }
+            LOGGER.info("Saving spells to wand: capacity=$capacity, slots=${inventorySlots.size}")
+            wand.setInventorySlots(wandStack, inventorySlots)
+
+            // 验证保存是否成功
+            val savedSlots = wand.getInventorySlots(wandStack)
+            LOGGER.info("Saved slots count: ${savedSlots.size}")
+            savedSlots.forEachIndexed { index, slot ->
+                LOGGER.info("  Saved Slot $index: ${if (slot == null) "null" else slot.displayName.string}")
+            }
+        } else {
+            // 理论上不会进入此处
+            LOGGER.error("WandWorkbenchMenu: wandStack.item is not Wand")
+            Containers.dropContents(player.level(), player.blockPosition(), spellContainer)
+        }
+        spellContainer.clearContent()
     }
 
     private fun addSpellSlots() {
@@ -155,8 +191,26 @@ class WandWorkbenchMenu(
     override fun removed(player: Player) {
         super.removed(player)
         access.execute { _, _ ->
+            val wand: ItemStack = wandContainer.getItem(0) // FIXME 法杖栏有法杖时，玩家连续按两下 ESC 会报空指针
+            saveSpellsToWand(player, wand)
             clearContainer(player, wandContainer)
-            clearContainer(player, spellContainer)
+        }
+    }
+
+    private fun loadSpellsFromWand() {
+        val wandStack = wandContainer.getItem(0)
+        if (wandStack.isEmpty) return
+
+        if (wandStack.item is Wand) {
+            val item = wandStack.item as Wand
+            val inventorySlots = item.getInventorySlots(wandStack)
+
+            spellContainer.clearContent()
+            inventorySlots.forEachIndexed { index, itemStack ->
+                if (itemStack != null && !itemStack.isEmpty) {
+                    spellContainer.setItem(index, itemStack)
+                }
+            }
         }
     }
 
@@ -184,6 +238,14 @@ class WandWorkbenchMenu(
 
         override fun isActive(): Boolean {
             return containerIndex in 0..<capacity
+        }
+
+        override fun getItem(): ItemStack {
+            return if (containerIndex !in 0..<capacity) {
+                ItemStack.EMPTY
+            } else {
+                super.getItem()
+            }
         }
     }
 }
