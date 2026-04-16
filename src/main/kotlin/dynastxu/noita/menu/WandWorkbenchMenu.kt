@@ -78,7 +78,7 @@ class WandWorkbenchMenu(
             val capacity = wand.getCapacity(wandStack)  // 直接从法杖读取容量
             val inventorySlots = List(capacity) { index ->
                 val itemStack = spellContainer.getItem(index)
-                if (itemStack.isEmpty) null else itemStack
+                if (itemStack.isEmpty) ItemStack.EMPTY else itemStack
             }
             LOGGER.info("Saving spells to wand: capacity=$capacity, slots=${inventorySlots.size}")
             wand.setInventorySlots(wandStack, inventorySlots)
@@ -191,7 +191,7 @@ class WandWorkbenchMenu(
     override fun removed(player: Player) {
         super.removed(player)
         access.execute { _, _ ->
-            val wand: ItemStack = wandContainer.getItem(0) // FIXME 法杖栏有法杖时，玩家连续按两下 ESC 会报空指针
+            val wand: ItemStack = wandContainer.getItem(0)
             saveSpellsToWand(player, wand)
             clearContainer(player, wandContainer)
         }

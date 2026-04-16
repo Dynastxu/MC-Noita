@@ -48,7 +48,7 @@ open class Wand(properties: Properties) : Item(properties) {
         )
     }
 
-    fun setInventorySlots(stack: ItemStack, inventorySlots: List<ItemStack?>) {
+    fun setInventorySlots(stack: ItemStack, inventorySlots: List<ItemStack>) {
         stack.set(WAND_DATA.get(), stack.get(WAND_DATA.get())!!.copy(inventorySlots = inventorySlots))
     }
 
